@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Insertion Sort Simulation</title>
+  <!-- Sử dụng Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-8">
+  <div class="max-w-4xl mx-auto bg-white p-6 shadow rounded">
+    <h1 class="text-2xl font-bold mb-4">Insertion Sort Simulation</h1>
+
+    <!-- Hiển thị code snippet (Insertion Sort bằng C++) -->
+    <div class="mb-6">
+      <h2 class="text-xl font-bold mb-2">Thuật toán Insertion Sort (C++):</h2>
+      <pre class="bg-gray-800 text-white p-4 rounded overflow-x-auto text-sm">
+        //Cài đặt thuật toán sắp xếp xen
+        void insertionSort(int A[], int n) {
+            for (int i = 1; i &lt; n; i++) {
+                //Xen phần tử A[i] vào vị trí thích hợp 
+                int key = A[i];
+                int j = i - 1;
+                while (j &gt;= 0 &amp;&amp; A[j] &gt; key) {
+                    A[j + 1] = A[j];
+                    j--;
+                }
+                A[j + 1] = key;
+                
+                //In các phần tử trong mảng A để kiểm tra
+                for (int k = 0; k &lt; n; k++)
+                    cout &lt;&lt; A[k] &lt;&lt; ' ';
+                cout &lt;&lt; endl;
+            }
+        }
+      </pre>
+    </div>
+
+    <!-- Khu vực nhập dữ liệu của người dùng -->
+    <div class="mb-4 flex items-center gap-2">
+      <input id="userArray" type="text" placeholder="Nhập các số (VD: 10, 5, 3, 8...)"
+        class="border border-gray-300 rounded p-2 w-full" />
+      <button id="sortBtn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded">
+        Sort
+      </button>
+    </div>
+
+    <!-- Các nút điều hướng qua các bước -->
+    <div class="mb-4">
+      <button id="prevBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-2">
+        Previous Step
+      </button>
+      <button id="nextBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+        Next Step
+      </button>
+    </div>
+
+    <!-- Thông tin về bước hiện tại -->
+    <div id="stepInfo" class="mb-4 text-lg font-medium"></div>
+
+    <!-- Bảng hiển thị trạng thái của các biến -->
+    <table class="table-fixed w-full border-collapse border border-gray-300">
+      <thead>
+        <tr>
+          <th class="border border-gray-300 p-2 w-80 text-center">Description</th>
+          <th class="border border-gray-300 p-2 w-80 text-center">A</th>
+          <th class="border border-gray-300 p-2 w-10 text-center">i</th>
+          <th class="border border-gray-300 p-2 w-10 text-center">j</th>
+          <th class="border border-gray-300 p-2 w-10 text-center">key</th>
+        </tr>
+      </thead>
+      <tbody id="stateTable">
+        <!-- Các bước được thêm vào đây -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Mảng chứa các bước mô phỏng
+    let simulationSteps = [];
+    let currentStepIndex = 0;
+
+    // Hàm ghi nhận (step) vào mảng simulationSteps
+    function recordStep(description, A, i, j, key) {
+      // Sao chép mảng A để lưu lại trạng thái
+      const A_copy = [...A];
+      simulationSteps.push({
+        description: description,
+        A: JSON.stringify(A_copy),
+        i: i,
+        j: j,
+        key: key
+      });
+    }
+
+    // Hàm insertion sort mô phỏng, ghi lại từng bước
+    function insertionSortSim(A) {
+      for (let i = 1; i < A.length; i++) {
+        let key = A[i];
+        let j = i - 1;
+
+        // Ghi nhận: Bắt đầu vòng lặp i
+        recordStep(`Start iteration i = ${i}`, A, i, j, key);
+
+        // Dịch các phần tử lớn hơn key sang phải
+        while (j >= 0 && A[j] > key) {
+          recordStep(`Compare A[${j}] (${A[j]}) > key (${key}) -> shift`, A, i, j, key);
+          A[j + 1] = A[j];
+          j--;
+          recordStep(`After shifting A[${j + 1}]`, A, i, j, key);
+        }
+
+        // Chèn key vào đúng vị trí
+        A[j + 1] = key;
+        recordStep(`Place key ${key} at A[${j + 1}]`, A, i, j, key);
+      }
+    }
+
+    // Hàm thêm một hàng mới vào bảng cho bước được chỉ định
+    function appendRowForStep(step) {
+      const stateTable = document.getElementById('stateTable');
+      const row = document.createElement('tr');
+
+      function createCell(text) {
+        const cell = document.createElement('td');
+        cell.className = 'border border-gray-300 p-2 text-center';
+        cell.innerText = text;
+        return cell;
+      }
+
+      row.appendChild(createCell(step.description));
+      row.appendChild(createCell(step.A));
+      row.appendChild(createCell(step.i));
+      row.appendChild(createCell(step.j));
+      row.appendChild(createCell(step.key));
+      stateTable.appendChild(row);
+    }
+
+    // Hàm xóa hàng cuối cùng trong bảng
+    function removeLastRow() {
+      const stateTable = document.getElementById('stateTable');
+      if (stateTable.lastChild) {
+        stateTable.removeChild(stateTable.lastChild);
+      }
+    }
+
+    // Hàm cập nhật thông tin bước
+    function updateStepInfo() {
+      document.getElementById('stepInfo').innerText = `Step ${currentStepIndex + 1} / ${simulationSteps.length}`;
+    }
+
+    // Hàm chạy mô phỏng Insertion Sort trên mảng arr
+    function runSimulation(arr) {
+      simulationSteps = [];
+      currentStepIndex = 0;
+      let arrayCopy = [...arr];
+      insertionSortSim(arrayCopy);
+
+      // Xoá bảng hiển thị bước cũ (nếu có)
+      document.getElementById('stateTable').innerHTML = '';
+      // Nếu có bước mô phỏng, thêm hàng đầu tiên
+      if (simulationSteps.length > 0) {
+        appendRowForStep(simulationSteps[0]);
+      }
+      updateStepInfo();
+    }
+
+    // Sự kiện cho nút Sort: parse mảng, chạy mô phỏng
+    document.getElementById('sortBtn').addEventListener('click', () => {
+      const userInput = document.getElementById('userArray').value.trim();
+      if (!userInput) {
+        alert('Vui lòng nhập ít nhất một số!');
+        return;
+      }
+      const arr = userInput.split(/[,\s]+/)
+        .map(numStr => parseInt(numStr, 10))
+        .filter(n => !isNaN(n));
+
+      if (arr.length === 0) {
+        alert('Dữ liệu không hợp lệ. Vui lòng nhập các số cách nhau bằng dấu phẩy hoặc khoảng trắng.');
+        return;
+      }
+      runSimulation(arr);
+    });
+
+    // Sự kiện cho nút Next: thêm hàng mới cho bước tiếp theo
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      if (currentStepIndex < simulationSteps.length - 1) {
+        currentStepIndex++;
+        appendRowForStep(simulationSteps[currentStepIndex]);
+        updateStepInfo();
+      }
+    });
+
+    // Sự kiện cho nút Previous: xóa hàng cuối cùng và quay lại bước trước đó
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      if (currentStepIndex > 0) {
+        removeLastRow();
+        currentStepIndex--;
+        updateStepInfo();
+      }
+    });
+
+    // Tuỳ chọn: Nếu muốn có một mảng mặc định khi mở trang, bỏ comment dòng dưới:
+    // runSimulation([10, 5, 3, 8, 9, 1]);
+  </script>
+</body>
+
+</html>

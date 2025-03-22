@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Merge Sort Simulation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-8">
+  <div class="max-w-4xl mx-auto bg-white p-6 shadow rounded">
+    <h1 class="text-2xl font-bold mb-4">Merge Sort Simulation</h1>
+    <!-- Khối hiển thị code gốc của Merge Sort (C++). -->
+    <div class="mb-6">
+      <h2 class="text-xl font-bold mb-2">Thuật toán Merge Sort (C++):</h2>
+      <pre class="bg-gray-800 text-white p-4 rounded overflow-x-auto text-sm">
+        //Cài đặt thuật toán sắp xếp trộn
+        vector&lt;int&gt; mergeSort(vector&lt;int&gt; A) {
+            int n = A.size();
+            if (n &lt;= 1)
+                return A;
+
+            int m = n/2;
+            vector&lt;int&gt; L = mergeSort(vector&lt;int&gt;(A.begin(), A.begin() + m));
+            vector&lt;int&gt; R = mergeSort(vector&lt;int&gt;(A.begin() + m, A.end()));
+            vector&lt;int&gt; K;
+
+            //Trộn 2 danh sách L và R thành danh sách K
+            vector&lt;int&gt;::size_type i = 0, j = 0;
+            while (i &lt; L.size() &amp;&amp; j &lt; R.size()) {
+                if (L[i] &lt;= R[j]) {
+                    K.push_back(L[i]);
+                    i++;
+                } else {
+                    K.push_back(R[j]);
+                    j++;
+                }
+            }
+
+            while (i &lt; L.size()) {
+                K.push_back(L[i]);
+                i++;
+            }
+
+            while (j &lt; R.size()) {
+                K.push_back(R[j]);
+                j++;
+            }
+
+            return K;
+        }
+      </pre>
+    </div>
+    <!-- Khu vực nhập dữ liệu của người dùng -->
+    <div class="mb-4 flex items-center gap-2">
+      <input id="userArray" type="text" placeholder="Nhập các số, ví dụ: 38, 27, 43, 3..."
+        class="border border-gray-300 rounded p-2 w-full" />
+      <button id="sortBtn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded">
+        Sort
+      </button>
+    </div>
+
+    <!-- Các nút điều hướng qua các bước -->
+    <div class="mb-4">
+      <button id="prevBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-2">
+        Previous Step
+      </button>
+      <button id="nextBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+        Next Step
+      </button>
+    </div>
+
+    <!-- Thông tin bước hiện tại -->
+    <div id="stepInfo" class="mb-4 text-lg font-medium"></div>
+
+    <!-- Bảng hiển thị trạng thái -->
+    <table class="min-w-full border-collapse border border-gray-300">
+      <thead>
+        <tr>
+          <th class="border border-gray-300 p-2">Description</th>
+          <th class="border border-gray-300 p-2">A</th>
+          <th class="border border-gray-300 p-2">L</th>
+          <th class="border border-gray-300 p-2">R</th>
+          <th class="border border-gray-300 p-2">K</th>
+          <th class="border border-gray-300 p-2">i</th>
+          <th class="border border-gray-300 p-2">j</th>
+          <th class="border border-gray-300 p-2">Depth</th>
+        </tr>
+      </thead>
+      <tbody id="stateTable">
+        <!-- Các bước sẽ được chèn vào đây -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Mảng chứa các bước mô phỏng
+    let simulationSteps = [];
+    let currentStepIndex = 0;
+
+    // Hàm ghi nhận bước (step) vào mảng simulationSteps
+    function recordStep(step) {
+      simulationSteps.push(step);
+    }
+
+    // Hàm Merge Sort có ghi lại bước mô phỏng
+    function mergeSortSim(A, depth) {
+      // Ghi nhận: bắt đầu gọi mergeSort cho mảng A
+      recordStep({
+        description: 'Call mergeSort',
+        A: JSON.stringify(A),
+        L: '-',
+        R: '-',
+        K: '-',
+        i: '-',
+        j: '-',
+        depth: depth
+      });
+
+      // Trường hợp mảng có 0 hoặc 1 phần tử -> trả về ngay
+      if (A.length <= 1) {
+        recordStep({
+          description: 'Base case, return array',
+          A: JSON.stringify(A),
+          L: '-',
+          R: '-',
+          K: JSON.stringify(A),
+          i: '-',
+          j: '-',
+          depth: depth
+        });
+        return A;
+      }
+
+      // Tính chỉ số chia mảng
+      const m = Math.floor(A.length / 2);
+      recordStep({
+        description: `Split array at m = ${m}`,
+        A: JSON.stringify(A),
+        L: JSON.stringify(A.slice(0, m)),
+        R: JSON.stringify(A.slice(m)),
+        K: '-',
+        i: '-',
+        j: '-',
+        depth: depth
+      });
+
+      // Đệ quy xử lý 2 nửa
+      let L = mergeSortSim(A.slice(0, m), depth + 1);
+      let R = mergeSortSim(A.slice(m), depth + 1);
+
+      // Bắt đầu giai đoạn trộn L và R
+      recordStep({
+        description: 'Start merging',
+        A: JSON.stringify(A),
+        L: JSON.stringify(L),
+        R: JSON.stringify(R),
+        K: '[]',
+        i: 0,
+        j: 0,
+        depth: depth
+      });
+
+      let i = 0, j = 0;
+      let K = [];
+
+      // So sánh L[i] và R[j], push phần tử nhỏ hơn
+      while (i < L.length && j < R.length) {
+        recordStep({
+          description: `Compare L[${i}] (${L[i]}) và R[${j}] (${R[j]})`,
+          A: JSON.stringify(A),
+          L: JSON.stringify(L),
+          R: JSON.stringify(R),
+          K: JSON.stringify(K),
+          i: i,
+          j: j,
+          depth: depth
+        });
+        if (L[i] <= R[j]) {
+          K.push(L[i]);
+          recordStep({
+            description: `Push L[${i}] (${L[i]}) vào K`,
+            A: JSON.stringify(A),
+            L: JSON.stringify(L),
+            R: JSON.stringify(R),
+            K: JSON.stringify(K),
+            i: i,
+            j: j,
+            depth: depth
+          });
+          i++;
+        } else {
+          K.push(R[j]);
+          recordStep({
+            description: `Push R[${j}] (${R[j]}) vào K`,
+            A: JSON.stringify(A),
+            L: JSON.stringify(L),
+            R: JSON.stringify(R),
+            K: JSON.stringify(K),
+            i: i,
+            j: j,
+            depth: depth
+          });
+          j++;
+        }
+      }
+
+      // Thêm các phần tử còn lại của L (nếu còn)
+      while (i < L.length) {
+        K.push(L[i]);
+        recordStep({
+          description: `Push phần tử còn lại L[${i}] (${L[i]}) vào K`,
+          A: JSON.stringify(A),
+          L: JSON.stringify(L),
+          R: JSON.stringify(R),
+          K: JSON.stringify(K),
+          i: i,
+          j: j,
+          depth: depth
+        });
+        i++;
+      }
+
+      // Thêm các phần tử còn lại của R (nếu còn)
+      while (j < R.length) {
+        K.push(R[j]);
+        recordStep({
+          description: `Push phần tử còn lại R[${j}] (${R[j]}) vào K`,
+          A: JSON.stringify(A),
+          L: JSON.stringify(L),
+          R: JSON.stringify(R),
+          K: JSON.stringify(K),
+          i: i,
+          j: j,
+          depth: depth
+        });
+        j++;
+      }
+
+      // Kết thúc trộn
+      recordStep({
+        description: 'Hoàn thành trộn, trả về mảng đã sắp xếp',
+        A: JSON.stringify(A),
+        L: JSON.stringify(L),
+        R: JSON.stringify(R),
+        K: JSON.stringify(K),
+        i: i,
+        j: j,
+        depth: depth
+      });
+
+      return K;
+    }
+
+    // Hàm cập nhật bảng (hiển thị step hiện tại)
+    function updateTable() {
+      const stateTable = document.getElementById('stateTable');
+      stateTable.innerHTML = '';
+
+      if (simulationSteps.length === 0) {
+        document.getElementById('stepInfo').innerText = 'Chưa có bước nào.';
+        return;
+      }
+
+      const step = simulationSteps[currentStepIndex];
+
+      // Tạo hàng và cells cho bước hiện tại
+      const row = document.createElement('tr');
+
+      function createCell(text) {
+        const cell = document.createElement('td');
+        cell.className = 'border border-gray-300 p-2';
+        cell.innerText = text;
+        return cell;
+      }
+
+      row.appendChild(createCell(step.description));
+      row.appendChild(createCell(step.A));
+      row.appendChild(createCell(step.L));
+      row.appendChild(createCell(step.R));
+      row.appendChild(createCell(step.K));
+      row.appendChild(createCell(step.i));
+      row.appendChild(createCell(step.j));
+      row.appendChild(createCell(step.depth));
+
+      stateTable.appendChild(row);
+
+      document.getElementById('stepInfo').innerText = `Step ${currentStepIndex + 1} / ${simulationSteps.length}`;
+    }
+
+    // Hàm khởi chạy mô phỏng với một mảng cho trước
+    function runSimulation(arr) {
+      // Xoá dữ liệu cũ
+      simulationSteps = [];
+      currentStepIndex = 0;
+
+      // Ghi lại các bước merge sort
+      mergeSortSim(arr, 0);
+
+      // Hiển thị bước đầu tiên
+      updateTable();
+    }
+
+    // Sự kiện cho nút Sort (lấy dữ liệu từ input, parse sang mảng, chạy mô phỏng)
+    document.getElementById('sortBtn').addEventListener('click', () => {
+      const userInput = document.getElementById('userArray').value.trim();
+      if (!userInput) {
+        alert('Vui lòng nhập ít nhất một số!');
+        return;
+      }
+      // Tách chuỗi thành mảng các số (giả định người dùng nhập bằng dấu phẩy hoặc dấu cách)
+      const arr = userInput
+        .split(/[,\s]+/)
+        .map(numStr => parseInt(numStr, 10))
+        .filter(n => !isNaN(n));
+
+      if (arr.length === 0) {
+        alert('Dữ liệu không hợp lệ. Vui lòng nhập các số cách nhau bằng dấu phẩy hoặc khoảng trắng.');
+        return;
+      }
+
+      runSimulation(arr);
+    });
+
+    // Sự kiện cho nút Next
+    document.getElementById('nextBtn').addEventListener('click', function () {
+      if (currentStepIndex < simulationSteps.length - 1) {
+        currentStepIndex++;
+        updateTable();
+      }
+    });
+
+    // Sự kiện cho nút Previous
+    document.getElementById('prevBtn').addEventListener('click', function () {
+      if (currentStepIndex > 0) {
+        currentStepIndex--;
+        updateTable();
+      }
+    });
+
+    // Tuỳ chọn: Nếu muốn khởi tạo với một mảng mặc định, có thể chạy lệnh này
+    // runSimulation([38, 27, 43, 3, 9, 82, 10]);
+  </script>
+</body>
+
+</html>

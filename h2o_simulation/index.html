@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mô phỏng phân tử</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1>Mô phỏng cấu trúc phân tử</h1>
+    <div id="canvas-container"></div>
+    <div class="controls">
+      <!-- Dropdown chọn phân tử -->
+      <label for="molecule-select">Chọn phân tử:</label>
+      <select id="molecule-select">
+        <option value="H2O">H₂O</option>
+        <option value="CO2">CO₂</option>
+        <option value="NH3">NH₃</option>
+        <option value="CH4">CH₄</option>
+      </select>
+      <br><br>
+
+      <!-- Các slider điều chỉnh (dành cho các phân tử mà thông số có thể thay đổi) -->
+      <label for="angle-slider">Góc liên kết:</label>
+      <input type="range" id="angle-slider" min="90" max="180" step="0.1" value="104.5">
+      <span id="angle-value">104.5°</span>
+      <br>
+      <label for="bond-length-slider">Độ dài liên kết:</label>
+      <input type="range" id="bond-length-slider" min="0.5" max="1.5" step="0.01" value="0.96">
+      <span id="bond-length-value">0.96 Å</span>
+      <br>
+      <button id="reset-button">Reset</button>
+    </div>
+
+    <div class="info">
+      <h2>Thông tin về phân tử</h2>
+      <p>
+        Mô phỏng này cho phép bạn xem cấu trúc của một số phân tử: H₂O, CO₂, NH₃, CH₄. Bạn có thể điều chỉnh góc liên
+        kết và độ dài liên kết (nếu có thể thay đổi) để quan sát ảnh hưởng đến cấu trúc.
+      </p>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>

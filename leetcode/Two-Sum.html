@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Mô phỏng twoSum</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 flex flex-col items-center p-4">
+
+  <h1 class="text-2xl font-bold mb-4">Mô phỏng thuật toán twoSum</h1>
+
+  <div class="bg-white shadow-md p-4 w-full max-w-3xl mb-6">
+    <h2 class="text-lg font-semibold mb-2">Code Java:</h2>
+    <pre class="bg-gray-100 p-2 rounded text-sm overflow-auto">
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        for(int i = 0; i < nums.length; i++){
+            for(int j = i + 1; j < nums.length; j++){
+                if(nums[i] + nums[j] == target){
+                    return new int[] {i, j};
+                }
+            }
+        }
+        return new int[]{};
+    }
+}
+    </pre>
+  </div>
+
+  <div class="bg-white shadow-md p-4 w-full max-w-3xl mb-6">
+    <h2 class="text-lg font-semibold mb-2">Nhập dữ liệu đầu vào</h2>
+    <label for="arrayInput" class="block mb-1">Mảng (các số, cách nhau bởi dấu phẩy):</label>
+    <input id="arrayInput" type="text" placeholder="Ví dụ: 2,7,11,15"
+      class="border border-gray-300 rounded w-full px-2 py-1 mb-2" />
+
+    <label for="targetInput" class="block mb-1">Target:</label>
+    <input id="targetInput" type="number" placeholder="Ví dụ: 9"
+      class="border border-gray-300 rounded w-full px-2 py-1 mb-2" />
+
+    <button id="startBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+      Bắt đầu mô phỏng
+    </button>
+  </div>
+
+  <div class="bg-white shadow-md p-4 w-full max-w-3xl">
+    <h2 class="text-lg font-semibold mb-2">Các bước thực thi</h2>
+
+    <div class="flex gap-2 mb-4">
+      <button id="prevBtn" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 disabled:opacity-50"
+        disabled>
+        Previous
+      </button>
+      <button id="nextBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+        disabled>
+        Next
+      </button>
+    </div>
+
+    <p class="text-sm text-gray-600 mb-2">
+      Mỗi vòng lặp: i chạy từ 0 đến nums.length - 1, j chạy từ i+1 đến nums.length - 1. 
+      Ở mỗi bước, ta kiểm tra <code>nums[i] + nums[j] == target</code>.
+    </p>
+
+    <table class="table-auto w-full border-collapse">
+      <thead>
+        <tr class="bg-gray-200">
+          <th class="border px-2 py-1">Bước</th>
+          <th class="border px-2 py-1">i</th>
+          <th class="border px-2 py-1">j</th>
+          <th class="border px-2 py-1">nums[i]</th>
+          <th class="border px-2 py-1">nums[j]</th>
+          <th class="border px-2 py-1">Tổng</th>
+          <th class="border px-2 py-1">So sánh với target</th>
+        </tr>
+      </thead>
+      <tbody id="stepsBody">
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const arrayInput = document.getElementById("arrayInput");
+    const targetInput = document.getElementById("targetInput");
+    const startBtn = document.getElementById("startBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const stepsBody = document.getElementById("stepsBody");
+
+    let steps = [];      // Mảng lưu lại các bước.
+    let currentStep = -1; // Chỉ số của bước hiện tại.
+
+    // Hàm tạo các bước mô phỏng
+    function createSteps(nums, target) {
+      const stepsArray = [];
+      let stepCount = 0;
+
+      for (let i = 0; i < nums.length; i++) {
+        for (let j = i + 1; j < nums.length; j++) {
+          const sum = nums[i] + nums[j];
+          const stepInfo = {
+            step: stepCount + 1,
+            i: i,
+            j: j,
+            numi: nums[i],
+            numj: nums[j],
+            sum: sum,
+            compare: sum === target ? "==" : (sum > target ? ">" : "<"),
+          };
+          stepsArray.push(stepInfo);
+          stepCount++;
+
+          // Nếu tìm thấy kết quả thì có thể dừng ở đây
+
+          // nhưng để mô phỏng đầy đủ, ta có thể để chạy hết.
+
+          // Nếu muốn dừng ngay khi tìm thấy, bỏ comment 2 dòng dưới:
+
+          if (sum === target) {
+
+            return stepsArray;
+
+          }
+
+        }
+      }
+      return stepsArray;
+    }
+
+    // Hàm thêm một hàng vào bảng
+    function addRow(step) {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+            <td class="border px-2 py-1">${step.step}</td>
+            <td class="border px-2 py-1">${step.i}</td>
+            <td class="border px-2 py-1">${step.j}</td>
+            <td class="border px-2 py-1">${step.numi}</td>
+            <td class="border px-2 py-1">${step.numj}</td>
+            <td class="border px-2 py-1">${step.sum}</td>
+            <td class="border px-2 py-1">
+                ${step.sum} ${step.compare} ${targetInput.value}
+            </td>
+        `;
+      stepsBody.appendChild(row);
+
+      // Cuộn xuống cuối bảng để hiển thị hàng mới nhất
+      stepsBody.scrollTop = stepsBody.scrollHeight;
+    }
+
+    // Hàm hiển thị bước hiện tại
+    function showStep(index) {
+      // Kích hoạt / vô hiệu hoá nút
+      prevBtn.disabled = index <= 0;
+      nextBtn.disabled = index >= steps.length - 1;
+
+      // Không cần ẩn/hiện, chỉ cần thêm hàng mới vào bảng
+      if (index >= 0 && index < steps.length) {
+        addRow(steps[index]);
+      }
+    }
+
+    // Sự kiện nhấn nút Bắt đầu mô phỏng
+    startBtn.addEventListener("click", () => {
+      const numsStr = arrayInput.value.trim();
+      const targetVal = parseInt(targetInput.value, 10);
+      if (!numsStr || isNaN(targetVal)) {
+        alert("Vui lòng nhập mảng và target hợp lệ!");
+        return;
+      }
+
+      // Tách mảng
+      const nums = numsStr.split(",").map(s => parseInt(s.trim(), 10));
+      if (nums.some(isNaN)) {
+        alert("Mảng chứa giá trị không phải số!");
+        return;
+      }
+
+      // Tạo steps và reset bảng
+      steps = createSteps(nums, targetVal);
+      stepsBody.innerHTML = ""; // Xóa nội dung bảng cũ
+      currentStep = 0;
+
+      if (steps.length === 0) {
+        alert("Mảng quá ngắn hoặc không thể mô phỏng.");
+        return;
+      }
+
+      showStep(currentStep);
+    });
+
+    // Nút Previous
+    prevBtn.addEventListener("click", () => {
+      currentStep--; // Giảm currentStep (không kiểm tra điều kiện ở đây)
+      showStep(currentStep); // Gọi showStep để xử lý việc hiển thị và nút
+
+      // Nếu bạn muốn xóa hàng khi quay lại, bạn có thể thêm dòng này:
+      if (currentStep < stepsBody.children.length - 1) stepsBody.lastChild.remove();
+
+    });
+
+    // Nút Next
+    nextBtn.addEventListener("click", () => {
+      currentStep++; // Tăng currentStep (không kiểm tra điều kiện ở đây)
+      showStep(currentStep); // Gọi showStep để xử lý việc hiển thị và nút
+
+    });
+  </script>
+
+</body>
+
+</html>

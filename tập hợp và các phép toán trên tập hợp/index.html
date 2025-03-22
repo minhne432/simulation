@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trò chơi Tập hợp</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="bg-gray-100 font-sans">
+  <div class="container mx-auto p-8">
+    <h1 class="text-3xl font-bold text-center mb-8">Trò chơi Tập hợp</h1>
+
+    <div id="intro" class="text-center mb-8">
+      <p>Chào mừng đến với trò chơi về Tập hợp! Hãy cùng ôn luyện kiến thức nào!</p>
+      <button id="start-btn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        Bắt đầu
+      </button>
+    </div>
+
+    <div id="question-area" class="hidden">
+      <div id="question" class="mb-4 text-lg"></div>
+      <div id="options" class="grid grid-cols-2 gap-4">
+      </div>
+      <div id="feedback" class="mt-4 text-center"></div>
+      <button id="next-btn" class="hidden bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4">
+        Câu tiếp theo
+      </button>
+    </div>
+    <div id="result" class="hidden text-center mt-8">
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lomuto Partition Simulation</title>
+  <!-- Sử dụng Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-8">
+  <div class="max-w-5xl mx-auto bg-white p-6 shadow rounded">
+    <h1 class="text-2xl font-bold mb-4">Lomuto Partition Simulation</h1>
+
+    <!-- Code Snippet (C++ Lomuto partition) -->
+    <div class="mb-6">
+      <h2 class="text-xl font-bold mb-2">Thuật toán Lomuto Partition (C++):</h2>
+      <pre class="bg-gray-800 text-white p-4 rounded overflow-x-auto text-sm">
+        int lomutoPartition(int A[], int lo, int hi) {
+            int pivot = A[hi];  // pivot nằm ở cuối mảng
+            int i = lo;         // i sẽ đánh dấu vùng phần tử <= pivot
+            for (int j = lo; j &lt; hi; j++) {
+                if (A[j] &lt;= pivot) {
+                    swap(A[i], A[j]);
+                    i++;
+                }
+            }
+            swap(A[i], A[hi]);
+            return i; // vị trí cuối cùng của pivot
+        }
+      </pre>
+    </div>
+
+    <!-- Vùng nhập dữ liệu -->
+    <div class="mb-4 flex items-center gap-2">
+      <input id="userArray" type="text" placeholder="Nhập các số (VD: 50, 80, 30, 70, 90...)"
+        class="border border-gray-300 rounded p-2 w-full" />
+      <button id="partitionBtn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded">
+        Partition
+      </button>
+    </div>
+
+    <!-- Nút điều hướng qua các bước -->
+    <div class="mb-4">
+      <button id="prevBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-2">
+        Previous Step
+      </button>
+      <button id="nextBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+        Next Step
+      </button>
+    </div>
+
+    <!-- Thông tin về bước hiện tại -->
+    <div id="stepInfo" class="mb-4 text-lg font-medium"></div>
+
+    <!-- Bảng hiển thị trạng thái của các biến -->
+    <table class="table-fixed w-full border-collapse border border-gray-300">
+      <thead>
+        <tr>
+          <th class="border border-gray-300 p-2 text-center w-1/2">Description</th>
+          <th class="border border-gray-300 p-2 text-center w-1/4">Array</th>
+          <th class="border border-gray-300 p-2 text-center w-1/12">i</th>
+          <th class="border border-gray-300 p-2 text-center w-1/12">j</th>
+          <th class="border border-gray-300 p-2 text-center w-1/12">pivot</th>
+        </tr>
+      </thead>
+      <tbody id="stateTable">
+        <!-- Các bước sẽ được thêm vào đây -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Mảng mô phỏng
+    let simulationSteps = [];
+    let currentStepIndex = 0;
+
+    // recordStep: Lưu trạng thái mỗi khi có swap hoặc sự kiện quan trọng
+    function recordStep(description, array, i, j, pivot) {
+      // Sao chép mảng để ghi lại
+      const arrCopy = [...array];
+      simulationSteps.push({
+        description: description,
+        A: JSON.stringify(arrCopy),
+        i: i,
+        j: j,
+        pivot: pivot
+      });
+    }
+
+    // Thực hiện partition theo Lomuto (bằng JavaScript),
+    // đồng thời ghi lại các bước vào simulationSteps.
+    function lomutoPartitionSim(A, lo, hi) {
+      const pivot = A[hi];
+      let i = lo;
+
+      // Bước 0: Chú thích pivot
+      recordStep(`Initial state, pivot = ${pivot}, lo=${lo}, hi=${hi}`, A, i, lo, pivot);
+
+      for (let j = lo; j < hi; j++) {
+        // Mỗi vòng for, ta "xem" A[j]
+        recordStep(`Check A[${j}] = ${A[j]} <= pivot?`, A, i, j, pivot);
+
+        if (A[j] <= pivot) {
+          // Ghi nhận trước khi swap
+          recordStep(`Swap A[${i}] (${A[i]}) với A[${j}] (${A[j]})`, A, i, j, pivot);
+          [A[i], A[j]] = [A[j], A[i]]; // swap
+          i++;
+          // Ghi nhận sau swap
+          recordStep(`After swap, i++ -> i=${i}`, A, i, j, pivot);
+        }
+      }
+      // Swap A[i] với A[hi] (đưa pivot về đúng vị trí)
+      recordStep(`Swap pivot A[${i}] (${A[i]}) với A[${hi}] (${A[hi]})`, A, i, hi, pivot);
+      [A[i], A[hi]] = [A[hi], A[i]];
+
+      recordStep(`Partition done, pivot final index = ${i}`, A, i, hi, pivot);
+
+      return i; // Vị trí pivot cuối cùng
+    }
+
+    // Thêm một row mới vào bảng tương ứng 1 step
+    function appendRowForStep(step) {
+      const stateTable = document.getElementById('stateTable');
+      const row = document.createElement('tr');
+
+      function createCell(text) {
+        const cell = document.createElement('td');
+        cell.className = 'border border-gray-300 p-2 text-center';
+        cell.innerText = text;
+        return cell;
+      }
+
+      row.appendChild(createCell(step.description));
+      row.appendChild(createCell(step.A));
+      row.appendChild(createCell(step.i));
+      row.appendChild(createCell(step.j));
+      row.appendChild(createCell(step.pivot));
+      stateTable.appendChild(row);
+    }
+
+    // Xóa hàng cuối cùng của bảng
+    function removeLastRow() {
+      const stateTable = document.getElementById('stateTable');
+      if (stateTable.lastChild) {
+        stateTable.removeChild(stateTable.lastChild);
+      }
+    }
+
+    function updateStepInfo() {
+      if (simulationSteps.length === 0) {
+        document.getElementById('stepInfo').innerText = 'No steps.';
+      } else {
+        document.getElementById('stepInfo').innerText =
+          `Step ${currentStepIndex + 1} / ${simulationSteps.length}`;
+      }
+    }
+
+    // Chạy partition mô phỏng trên mảng input
+    function runLomutoPartition(arr) {
+      // Reset steps
+      simulationSteps = [];
+      currentStepIndex = 0;
+
+      let arrayCopy = [...arr];
+      lomutoPartitionSim(arrayCopy, 0, arrayCopy.length - 1);
+
+      // Xoá nội dung bảng (nếu có)
+      document.getElementById('stateTable').innerHTML = '';
+      // Thêm hàng đầu tiên (nếu có step)
+      if (simulationSteps.length > 0) {
+        appendRowForStep(simulationSteps[0]);
+      }
+      updateStepInfo();
+    }
+
+    // Xử lý nút Partition
+    document.getElementById('partitionBtn').addEventListener('click', () => {
+      const userInput = document.getElementById('userArray').value.trim();
+      if (!userInput) {
+        alert('Vui lòng nhập ít nhất một số!');
+        return;
+      }
+      // Chuyển chuỗi thành mảng số
+      const arr = userInput
+        .split(/[,\s]+/)
+        .map(numStr => parseInt(numStr, 10))
+        .filter(n => !isNaN(n));
+
+      if (arr.length === 0) {
+        alert('Dữ liệu không hợp lệ. Vui lòng nhập các số cách nhau bằng dấu phẩy hoặc khoảng trắng.');
+        return;
+      }
+
+      // Chạy partition mô phỏng
+      runLomutoPartition(arr);
+    });
+
+    // Sự kiện Next
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      if (currentStepIndex < simulationSteps.length - 1) {
+        currentStepIndex++;
+        appendRowForStep(simulationSteps[currentStepIndex]);
+        updateStepInfo();
+      }
+    });
+
+    // Sự kiện Previous
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      if (currentStepIndex > 0) {
+        removeLastRow();
+        currentStepIndex--;
+        updateStepInfo();
+      }
+    });
+
+    // Tuỳ chọn: chạy sẵn trên một mảng mặc định
+    // runLomutoPartition([50, 80, 30, 70, 90, 60]);
+  </script>
+</body>
+
+</html>

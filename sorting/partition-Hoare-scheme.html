@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hoare Partition Simulation</title>
+  <!-- Sử dụng Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-8">
+  <div class="max-w-5xl mx-auto bg-white p-6 shadow rounded">
+    <h1 class="text-2xl font-bold mb-4">Hoare Partition Simulation</h1>
+
+    <!-- Code Snippet (C++ Hoare partition) -->
+    <div class="mb-6">
+      <h2 class="text-xl font-bold mb-2">Thuật toán Hoare Partition (C++):</h2>
+      <pre class="bg-gray-800 text-white p-4 rounded overflow-x-auto text-sm">
+        int hoarePartition(int A[], int lo, int hi) {
+            int pivot = 73;   // Ở đây pivot cố định là 73
+            int i = lo;
+            int j = hi;
+            while (true) {
+                while (A[i] &lt; pivot) i++;      // đi sang phải
+                while (A[j] &gt;= pivot) j--;     // đi sang trái
+                if (i &lt; j) {
+                    swap(A[i], A[j]);
+                } else {
+                    return j; // vị trí final
+                }
+            }
+        }
+      </pre>
+    </div>
+
+    <!-- Vùng nhập dữ liệu -->
+    <div class="mb-4 flex items-center gap-2">
+      <input id="userArray" type="text" placeholder="Nhập các số (VD: 70, 80, 60, 73, 90...)"
+        class="border border-gray-300 rounded p-2 w-full" />
+      <button id="partitionBtn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded">
+        Partition
+      </button>
+    </div>
+
+    <!-- Nút điều hướng qua các bước -->
+    <div class="mb-4">
+      <button id="prevBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-2">
+        Previous Step
+      </button>
+      <button id="nextBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+        Next Step
+      </button>
+    </div>
+
+    <!-- Thông tin về bước hiện tại -->
+    <div id="stepInfo" class="mb-4 text-lg font-medium"></div>
+
+    <!-- Bảng hiển thị trạng thái của các biến -->
+    <table class="table-fixed w-full border-collapse border border-gray-300">
+      <thead>
+        <tr>
+          <th class="border border-gray-300 p-2 text-center w-1/2">Description</th>
+          <th class="border border-gray-300 p-2 text-center w-1/4">Array</th>
+          <th class="border border-gray-300 p-2 text-center w-1/12">i</th>
+          <th class="border border-gray-300 p-2 text-center w-1/12">j</th>
+          <th class="border border-gray-300 p-2 text-center w-1/12">pivot</th>
+        </tr>
+      </thead>
+      <tbody id="stateTable">
+        <!-- Các bước được thêm vào đây -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Mảng mô phỏng
+    let simulationSteps = [];
+    let currentStepIndex = 0;
+
+    // recordStep: Lưu trạng thái
+    function recordStep(description, array, i, j, pivot) {
+      // Sao chép mảng để ghi lại
+      const arrCopy = [...array];
+      simulationSteps.push({
+        description: description,
+        A: JSON.stringify(arrCopy),
+        i: i,
+        j: j,
+        pivot: pivot
+      });
+    }
+
+    // Hoare partition mô phỏng (pivot = 73)
+    function hoarePartitionSim(A, lo, hi) {
+      const pivot = 73;
+      let i = lo;
+      let j = hi;
+
+      recordStep(`Initial state, pivot=${pivot}, lo=${lo}, hi=${hi}`, A, i, j, pivot);
+
+      while (true) {
+        // Di chuyển i sang phải cho đến khi A[i] >= pivot
+        while (A[i] < pivot) {
+          recordStep(`A[${i}]=${A[i]} < pivot -> i++`, A, i, j, pivot);
+          i++;
+        }
+
+        // Di chuyển j sang trái cho đến khi A[j] < pivot
+        while (A[j] >= pivot) {
+          recordStep(`A[${j}]=${A[j]} >= pivot -> j--`, A, i, j, pivot);
+          j--;
+        }
+
+        if (i < j) {
+          // Swap A[i] và A[j]
+          recordStep(`Swap A[${i}] (${A[i]}) với A[${j}] (${A[j]})`, A, i, j, pivot);
+          [A[i], A[j]] = [A[j], A[i]];
+
+          recordStep(`After swap`, A, i, j, pivot);
+
+          // Sau khi swap xong, tiếp tục
+          i++;
+          j--;
+          recordStep(`Move i->${i}, j->${j}`, A, i, j, pivot);
+        } else {
+          // i >= j -> partition kết thúc
+          recordStep(`Partition done, returning j=${j}`, A, i, j, pivot);
+          break;
+        }
+      }
+      return j;
+    }
+
+    // Thêm 1 row cho step
+    function appendRowForStep(step) {
+      const stateTable = document.getElementById('stateTable');
+      const row = document.createElement('tr');
+
+      function createCell(text) {
+        const cell = document.createElement('td');
+        cell.className = 'border border-gray-300 p-2 text-center';
+        cell.innerText = text;
+        return cell;
+      }
+
+      row.appendChild(createCell(step.description));
+      row.appendChild(createCell(step.A));
+      row.appendChild(createCell(step.i));
+      row.appendChild(createCell(step.j));
+      row.appendChild(createCell(step.pivot));
+      stateTable.appendChild(row);
+    }
+
+    // Xóa hàng cuối cùng của bảng
+    function removeLastRow() {
+      const stateTable = document.getElementById('stateTable');
+      if (stateTable.lastChild) {
+        stateTable.removeChild(stateTable.lastChild);
+      }
+    }
+
+    function updateStepInfo() {
+      if (simulationSteps.length === 0) {
+        document.getElementById('stepInfo').innerText = 'No steps.';
+      } else {
+        document.getElementById('stepInfo').innerText =
+          `Step ${currentStepIndex + 1} / ${simulationSteps.length}`;
+      }
+    }
+
+    // Chạy partition mô phỏng
+    function runHoarePartition(arr) {
+      simulationSteps = [];
+      currentStepIndex = 0;
+
+      let arrayCopy = [...arr];
+      hoarePartitionSim(arrayCopy, 0, arrayCopy.length - 1);
+
+      // Xoá nội dung bảng
+      document.getElementById('stateTable').innerHTML = '';
+      // Thêm bước đầu (nếu có)
+      if (simulationSteps.length > 0) {
+        appendRowForStep(simulationSteps[0]);
+      }
+      updateStepInfo();
+    }
+
+    // Nút Partition
+    document.getElementById('partitionBtn').addEventListener('click', () => {
+      const userInput = document.getElementById('userArray').value.trim();
+      if (!userInput) {
+        alert('Vui lòng nhập ít nhất một số!');
+        return;
+      }
+      // Parse mảng
+      const arr = userInput
+        .split(/[,\s]+/)
+        .map(numStr => parseInt(numStr, 10))
+        .filter(n => !isNaN(n));
+
+      if (arr.length === 0) {
+        alert('Dữ liệu không hợp lệ. Vui lòng nhập các số cách nhau bằng dấu phẩy hoặc khoảng trắng.');
+        return;
+      }
+      // Chạy
+      runHoarePartition(arr);
+    });
+
+    // Nút Next
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      if (currentStepIndex < simulationSteps.length - 1) {
+        currentStepIndex++;
+        appendRowForStep(simulationSteps[currentStepIndex]);
+        updateStepInfo();
+      }
+    });
+
+    // Nút Previous
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      if (currentStepIndex > 0) {
+        removeLastRow();
+        currentStepIndex--;
+        updateStepInfo();
+      }
+    });
+
+    // Có thể khởi chạy mặc định
+    // runHoarePartition([70, 80, 60, 73, 90, 72, 73, 50]);
+  </script>
+</body>
+
+</html>

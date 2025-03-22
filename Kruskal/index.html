@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Mô phỏng Kruskal</title>
+  <!-- CDN Tailwind CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.1/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 min-h-screen p-4">
+
+  <!-- Phần hiển thị code gốc -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold mb-2">Thuật toán Kruskal (C++ code)</h1>
+    <pre class="bg-white p-4 rounded shadow overflow-auto text-sm">
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+struct Edge {
+    int u, v, w;
+};
+
+struct Graph {
+    Edge edges[2500];
+    int n, m;
+};
+
+int parent[100];
+
+int find_root(int u) {
+    if (parent[u] == u)
+        return u;
+    return find_root(parent[u]);
+}
+
+bool sosanh(Edge a, Edge b) {
+    return a.w &lt; b.w;
+}
+
+void Kruskal(Graph* G) {
+    //1. Sắp xếp các cạnh
+    sort(G-&gt;edges, G-&gt;edges + G-&gt;m, sosanh);
+
+    //2. Khởi tạo parent
+    for (int v = 1; v &lt;= G-&gt;n; v++)
+        parent[v] = v;
+
+    //3. Duyệt qua các cạnh
+    int sum = 0;
+    int cnt = 0;
+    int Total = 0;
+    for (int e = 0; e &lt; G-&gt;m; e++) {
+        int u = G-&gt;edges[e].u;
+        int v = G-&gt;edges[e].v;
+        int w = G-&gt;edges[e].w;
+        Total += w;
+
+        int root_u = find_root(u);
+        int root_v = find_root(v);
+        if (root_u != root_v) {
+            sum += w;
+            parent[root_v] = root_u;
+            cnt++;
+        }
+    }
+    if (cnt == (G-&gt;n - 1))
+        cout &lt;&lt; Total - sum &lt;&lt; endl;
+    else
+        cout &lt;&lt; -1 &lt;&lt; endl;
+}
+
+int main() {
+    int T, n;
+    cin &gt;&gt; T;
+    for (int it = 1; it &lt;= T; it++) {
+        Graph G;
+        cin &gt;&gt; n;
+        G.n = n;
+        G.m = 0;
+        for (int i = 1; i &lt;= n; i++)
+            for (int j = 1; j &lt;= n; j++) {
+                int w;
+                cin &gt;&gt; w;
+                if (w &gt; 0) {
+                    G.edges[G.m].u = i;
+                    G.edges[G.m].v = j;
+                    G.edges[G.m].w = w;
+                    G.m++;
+                }
+            }
+        cout &lt;&lt; "Case " &lt;&lt; it &lt;&lt; ": ";
+        Kruskal(&G);
+    }
+    return 0;
+}
+    </pre>
+  </div>
+
+  <!-- Khu vực nhập dữ liệu để mô phỏng -->
+  <div class="mb-4">
+    <h2 class="text-xl font-semibold mb-2">Nhập dữ liệu để mô phỏng Kruskal</h2>
+    <p class="text-sm text-gray-700 mb-2">Ví dụ: T=1, n=4, và ma trận 4x4 (các trọng số dương / 0). Mỗi test nhập lần
+      lượt: T, rồi n, rồi n*n số trong ma trận.</p>
+
+    <label class="block mb-2 font-medium">Nhập T và ma trận (theo định dạng dòng):</label>
+    <textarea id="inputData" rows="8" class="w-full p-2 border border-gray-300 rounded text-sm" placeholder="Ví dụ:
+1
+4
+0 1 2 3
+1 0 4 0
+2 4 0 0
+3 0 0 0
+"></textarea>
+    <button id="simulateBtn" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500">Mô phỏng</button>
+  </div>
+
+  <!-- Nút Previous / Next -->
+  <div class="flex items-center gap-4 mb-4">
+    <button id="prevBtn" disabled class="px-3 py-2 bg-gray-400 text-white rounded">Previous</button>
+    <button id="nextBtn" disabled class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-500">Next</button>
+  </div>
+
+  <!-- Bảng hiển thị các bước -->
+  <div>
+    <h2 class="text-xl font-semibold mb-2">Bước thực hiện</h2>
+    <table class="min-w-full bg-white border border-gray-300 text-sm">
+      <thead class="bg-gray-200">
+        <tr>
+          <th class="border p-2">#</th>
+          <th class="border p-2">Mô tả Bước</th>
+          <th class="border p-2">Cạnh đang xét (u, v, w)</th>
+          <th class="border p-2">Parent[]</th>
+          <th class="border p-2">sum</th>
+          <th class="border p-2">cnt</th>
+          <th class="border p-2">Total</th>
+        </tr>
+      </thead>
+      <tbody id="stepTableBody">
+        <!-- Các bước sẽ được thêm vào đây -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Script mô phỏng Kruskal -->
+  <script>
+    // Ta sẽ mô phỏng chính xác các bước như trong code C++:
+    // 1) Đọc T, sau đó cho từng test:
+    //    - Đọc n
+    //    - Đọc ma trận n*n, lấy các cạnh (u,v,w>0)
+    //    - Sắp xếp
+    //    - Khởi tạo parent
+    //    - Duyệt edges, tính sum, cnt, total...
+
+    let steps = [];        // Mảng lưu toàn bộ step (cho tất cả T test). Mỗi step là 1 object chứa thông tin hiển thị.
+    let currentStep = 0;   // Chỉ số step hiện tại (index trong mảng steps)
+
+    const stepTableBody = document.getElementById('stepTableBody');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    // Khi bấm "Mô phỏng"
+    document.getElementById('simulateBtn').addEventListener('click', () => {
+      // Xóa các step cũ
+      steps = [];
+      currentStep = 0;
+      while (stepTableBody.firstChild) {
+        stepTableBody.removeChild(stepTableBody.firstChild);
+      }
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
+
+      // Đọc dữ liệu từ textarea
+      const raw = document.getElementById('inputData').value.trim().split(/\s+/).map(Number);
+      if (!raw.length) return;
+
+      // Giả sử input: T, rồi cho mỗi test: n, (n*n trọng số)
+      let pointer = 0;
+      let T = raw[pointer++];
+      for (let it = 1; it <= T; it++) {
+        let n = raw[pointer++];
+        // Thu thập các cạnh
+        let edges = [];
+        for (let i = 1; i <= n; i++) {
+          for (let j = 1; j <= n; j++) {
+            let w = raw[pointer++];
+            if (w > 0) {
+              edges.push({ u: i, v: j, w: w });
+            }
+          }
+        }
+        // Gọi mô phỏng Kruskal cho test này
+        runKruskalSimulation(edges, n, it);
+      }
+
+      // Bật nút Next nếu có steps
+      if (steps.length > 0) {
+        nextBtn.disabled = false;
+      }
+    });
+
+    // Nút Next
+    nextBtn.addEventListener('click', () => {
+      if (currentStep < steps.length) {
+        // Thêm 1 dòng mới vào bảng cho step hiện tại
+        addStepRow(currentStep);
+        currentStep++;
+        prevBtn.disabled = false;
+        if (currentStep === steps.length) {
+          // Hết steps
+          nextBtn.disabled = true;
+        }
+      }
+    });
+
+    // Nút Previous
+    prevBtn.addEventListener('click', () => {
+      if (currentStep > 0) {
+        // Xóa dòng cuối cùng trong bảng
+        stepTableBody.deleteRow(stepTableBody.rows.length - 1);
+        currentStep--;
+        nextBtn.disabled = false;
+        if (currentStep === 0) {
+          prevBtn.disabled = true;
+        }
+      }
+    });
+
+    // Hàm thêm dòng mới vào bảng
+    function addStepRow(stepIndex) {
+      const s = steps[stepIndex];
+      const row = stepTableBody.insertRow();
+
+      // Các cột: #, mô tả bước, cạnh (u,v,w), parent[], sum, cnt, total
+      row.insertCell().textContent = stepIndex + 1; // Số thứ tự bước
+      row.insertCell().textContent = s.desc;
+      row.insertCell().textContent = s.edge ? `(${s.edge.u}, ${s.edge.v}, ${s.edge.w})` : "-";
+      row.insertCell().textContent = s.parent ? "[" + s.parent.join(", ") + "]" : "-";
+      row.insertCell().textContent = s.sum != null ? s.sum : "-";
+      row.insertCell().textContent = s.cnt != null ? s.cnt : "-";
+      row.insertCell().textContent = s.total != null ? s.total : "-";
+    }
+
+    // -----------------------------------------------------
+    // Mô phỏng Kruskal (chỉ ghi lại step, không in ra ngay)
+    // -----------------------------------------------------
+    function runKruskalSimulation(edges, n, testIndex) {
+      // Tạo 1 loạt step mô tả
+      steps.push({
+        desc: `== Bắt đầu Test ${testIndex} (n=${n}) ==`
+      });
+
+      // 1. Sắp xếp
+      steps.push({ desc: `Bước 1: Sắp xếp các cạnh tăng dần theo w (trọng số)` });
+      edges.sort((a, b) => a.w - b.w);
+
+      // 2. Khởi tạo parent
+      let parent = [];
+      for (let v = 1; v <= n; v++) {
+        parent[v] = v;
+      }
+      steps.push({
+        desc: "Bước 2: Khởi tạo parent[v] = v",
+        parent: parent.slice(1) // cắt bớt index 0
+      });
+
+      // 3. Duyệt các cạnh
+      let sum = 0;
+      let cnt = 0;
+      let total = 0;
+      for (let e = 0; e < edges.length; e++) {
+        let { u, v, w } = edges[e];
+        total += w;
+      }
+      steps.push({
+        desc: `Tính ban đầu Total = tổng tất cả trọng số = ${total}`,
+        total: total,
+        sum: sum,
+        cnt: cnt,
+        parent: parent.slice(1)
+      });
+
+      for (let e = 0; e < edges.length; e++) {
+        let { u, v, w } = edges[e];
+        let root_u = findRoot(parent, u);
+        let root_v = findRoot(parent, v);
+
+        // Tạo step MÔ TẢ rằng ta đang xét cạnh (u, v, w)
+        steps.push({
+          desc: `Xét cạnh (u=${u}, v=${v}, w=${w})`,
+          edge: { u, v, w },
+          parent: parent.slice(1),
+          sum: sum,
+          cnt: cnt,
+          total: total
+        });
+
+        if (root_u !== root_v) {
+          sum += w;
+          parent[root_v] = root_u;
+          cnt++;
+          // Tạo step MÔ TẢ kết quả khi gộp (u,v)
+          steps.push({
+            desc: `Cạnh này được chọn (gộp root ${root_v} vào root ${root_u})`,
+            edge: { u, v, w },
+            parent: parent.slice(1),
+            sum: sum,
+            cnt: cnt,
+            total: total
+          });
+        } else {
+          steps.push({
+            desc: `Cạnh này bị bỏ qua (vì cùng root)`,
+            edge: { u, v, w },
+            parent: parent.slice(1),
+            sum: sum,
+            cnt: cnt,
+            total: total
+          });
+        }
+      }
+
+      // Cuối cùng: nếu cnt == n-1 => in total-sum, else -1
+      let result = (cnt === (n - 1)) ? (total - sum) : -1;
+      steps.push({
+        desc: `Kết quả: ${(cnt === n - 1) ? (total + " - " + sum + " = " + result) : "-1 (do chưa đủ n-1 cạnh)"}`
+      });
+    }
+
+    // Hàm findRoot mô phỏng find_root
+    function findRoot(parent, u) {
+      while (parent[u] !== u) {
+        u = parent[u];
+      }
+      return u;
+    }
+  </script>
+</body>
+
+</html>

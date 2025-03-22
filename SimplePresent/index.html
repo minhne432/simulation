@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<!-- Thêm class="dark" để khởi động ở chế độ Dark. Nếu muốn khởi động ở Light, bỏ class này đi. -->
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Present Simple Practice Game</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Cấu hình dark mode của Tailwind (tùy thuộc vào setup của bạn).
+       Mặc định, để dark mode hoạt động bằng class, bạn cần có:
+       tailwind.config = { darkMode: 'class', ... } 
+       (Nếu bạn cấu hình sẵn ở project, đoạn này có thể không cần) 
+  -->
+  <style>
+    /* Ví dụ đơn giản: tailwind tự xử lý, 
+       chỉ cần toggle class "dark" cho <html> hoặc <body> 
+    */
+    body {
+      transition: background-color 0.3s, color 0.3s;
+      /* Cho mượt mà hơn */
+    }
+  </style>
+</head>
+
+<body
+  class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col items-center justify-center">
+
+  <!-- Âm thanh phản hồi -->
+  <audio id="correct-sound" src="correct.mp3" preload="auto"></audio>
+  <audio id="wrong-sound" src="wrong.mp3" preload="auto"></audio>
+  <!-- 
+    Bạn có thể thay src=... bằng đường dẫn đến file âm thanh ding/buzz thật sự, 
+    ví dụ: "sounds/ding.mp3" hoặc link online. 
+    Để demo, có thể tìm bất kỳ file âm thanh ngắn nào và đổi tên.
+  -->
+
+  <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 w-full max-w-md">
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-bold">Present Simple Practice</h1>
+      <!-- Nút toggle Dark/Light mode -->
+      <button id="theme-toggle"
+        class="px-3 py-1 border rounded dark:border-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 text-sm">
+        Toggle Theme
+      </button>
+    </div>
+
+    <!-- Điểm số -->
+    <p id="score" class="mb-4 font-semibold">Score: 0</p>
+
+    <div id="question-container" class="mb-4">
+      <p id="question" class="text-lg font-medium"></p>
+    </div>
+
+    <input type="text" id="answer" class="border dark:border-gray-600 p-2 rounded w-full mb-4 text-gray-900"
+      placeholder="Your answer..." />
+
+    <button onclick="checkAnswer()" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+      Submit
+    </button>
+
+    <p id="feedback" class="mt-4 text-sm font-medium"></p>
+  </div>
+
+  <!-- Hiển thị phần review các câu sai và giải thích sau khi hoàn thành -->
+  <div id="review-container" class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 w-full max-w-md mt-4 hidden">
+    <h2 class="text-xl font-bold mb-4">Review Incorrect Answers</h2>
+    <ul id="review-list" class="list-disc pl-5"></ul>
+  </div>
+
+  <!-- Script -->
+  <script src="script.js"></script>
+</body>
+
+</html>
