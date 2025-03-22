@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Mô phỏng thuật toán tính giai thừa</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-50 min-h-screen p-6">
+
+  <!-- Tiêu đề -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold">Mô phỏng thuật toán tính giai thừa</h1>
+  </div>
+
+  <!-- Hiển thị code gốc -->
+  <div class="mb-6">
+    <h2 class="text-lg font-semibold">Thuật toán (Code C++)</h2>
+    <pre class="bg-white p-4 rounded shadow overflow-auto text-sm">
+int factorial(int n) {
+    // 1. Kiểm tra n == 0
+    if (n == 0)
+        return 1;  // Trả về 1
+        
+    // 2. Tính (n - 1)! và lưu lại trong n_1
+    int n_1 = factorial(n - 1);
+
+    // 3. Trả về tích của n_1 và n hay (n - 1)! * n
+    return n_1 * n;
+}
+    </pre>
+  </div>
+
+  <!-- Khu vực nhập dữ liệu -->
+  <div class="mb-6">
+    <h2 class="text-lg font-semibold mb-2">Nhập dữ liệu để mô phỏng</h2>
+    <div class="flex gap-4">
+      <input id="inputN" type="number" min="0" class="w-32 p-2 border border-gray-300 rounded" placeholder="Nhập n" />
+      <button id="startBtn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500">
+        Mô phỏng
+      </button>
+    </div>
+  </div>
+
+  <!-- Nút Previous / Next -->
+  <div class="flex gap-4 mb-4">
+    <button id="prevBtn" disabled class="px-3 py-2 bg-gray-400 text-white rounded">
+      Previous
+    </button>
+    <button id="nextBtn" disabled class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-500">
+      Next
+    </button>
+  </div>
+
+  <!-- Bảng hiển thị các bước thực hiện -->
+  <div>
+    <h2 class="text-lg font-semibold mb-2">Bước thực hiện</h2>
+    <table class="w-full text-sm border border-gray-300 bg-white rounded shadow">
+      <thead class="bg-gray-200">
+        <tr>
+          <th class="border p-2">#</th>
+          <th class="border p-2">Mô tả bước</th>
+          <th class="border p-2">n</th>
+          <th class="border p-2">n_1</th>
+          <th class="border p-2">Kết quả</th>
+        </tr>
+      </thead>
+      <tbody id="stepTableBody">
+        <!-- Các bước sẽ được thêm vào đây -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mô phỏng bằng JavaScript -->
+  <script>
+    let steps = []; // Danh sách các bước thực hiện
+    let currentStep = 0; // Vị trí bước hiện tại
+
+    const stepTableBody = document.getElementById('stepTableBody');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    // Khi nhấn "Mô phỏng"
+    document.getElementById('startBtn').addEventListener('click', () => {
+      const n = parseInt(document.getElementById('inputN').value);
+      if (isNaN(n) || n < 0) {
+        alert('Vui lòng nhập số nguyên không âm');
+        return;
+      }
+
+      steps = []; // Xóa các bước cũ
+      currentStep = 0;
+      stepTableBody.innerHTML = ""; // Xóa bảng cũ
+
+      simulateFactorial(n);
+
+      // Kích hoạt nút Next nếu có steps
+      if (steps.length > 0) {
+        nextBtn.disabled = false;
+      }
+    });
+
+    // Xử lý nút "Next"
+    nextBtn.addEventListener('click', () => {
+      if (currentStep < steps.length) {
+        addStepRow(currentStep);
+        currentStep++;
+        prevBtn.disabled = false;
+        if (currentStep === steps.length) nextBtn.disabled = true;
+      }
+    });
+
+    // Xử lý nút "Previous"
+    prevBtn.addEventListener('click', () => {
+      if (currentStep > 0) {
+        stepTableBody.deleteRow(stepTableBody.rows.length - 1);
+        currentStep--;
+        nextBtn.disabled = false;
+        if (currentStep === 0) prevBtn.disabled = true;
+      }
+    });
+
+    // Thêm một dòng vào bảng cho mỗi bước
+    function addStepRow(index) {
+      const step = steps[index];
+      const row = stepTableBody.insertRow();
+
+      const cell1 = row.insertCell();
+      cell1.textContent = index + 1;
+      cell1.classList.add('text-center');
+
+      const cell2 = row.insertCell();
+      cell2.textContent = step.desc;
+      cell2.classList.add('text-center');
+
+      const cell3 = row.insertCell();
+      cell3.textContent = step.n ?? "";
+      cell3.classList.add('text-center');
+
+      const cell4 = row.insertCell();
+      cell4.textContent = step.n_1 ?? "";
+      cell4.classList.add('text-center');
+
+      const cell5 = row.insertCell();
+      cell5.textContent = step.result ?? "";
+      cell5.classList.add('text-center');
+    }
+
+    // Mô phỏng thuật toán tính giai thừa
+    function simulateFactorial(n) {
+      function factorial(n) {
+        steps.push({
+          desc: `Gọi factorial(${n})`,
+          n
+        });
+
+        if (n === 0) {
+          steps.push({
+            desc: `n = 0 → Trả về 1`,
+            n,
+            result: 1
+          });
+          return 1;
+        }
+
+        let n_1 = factorial(n - 1);
+        let result = n * n_1;
+
+        steps.push({
+          desc: `factorial(${n}) = ${n} * ${n_1}`,
+          n,
+          n_1,
+          result
+        });
+
+        return result;
+      }
+
+      factorial(n);
+    }
+  </script>
+</body>
+
+</html>
